@@ -1,37 +1,60 @@
-// Есть номер телефона из 12-ти символов: `+71234567890`
-// Правила форматирования следующие:
-// - после +7 стоит пробел;
-// - затем идёт открывающая круглая скобка;
-// - затем три цифры (код региона);
-// - затем закрывающая круглая скобка;
-// - снова пробел;
-// - три цифры;
-// - минус;
-// - две цифры;
-// - минус;
-// - две цифры.
-// У нас должна быть функция, которая принимает телефон строкой и возвращает обратно отформатированные телефон:
+const $btn = document.getElementById('btn-kick');
 
-const phone = `+71234567890`;
-
-function formattedPhone(phone) {
-  let result = '';
-  for (let i = 0; i < phone.length; i++) {
-    if (i === 2) {
-      result += " ("; 
-    }
-    if (i === 5) {
-      result += ") ";
-    }
-     if (i === 8) {
-      result += "-"; 
-    }
-     if (i === 10) {
-      result += "-"; 
-    } 
-  	result += phone.charAt(i);
-  }
-  return result;
+const character = {
+  name: 'Picachu',
+  defaultHP: 100,
+  damageHP: 100,
+  elHP: document.getElementById('health-character'),
+  elProgressBar: document.getElementById('progressbar-character')
 }
 
-console.log(formattedPhone(phone)); // +7 (123) 456-78-90
+const enemy = {
+  name: 'Charmander',
+  defaultHP: 100,
+  damageHP: 100,
+  elHP: document.getElementById('health-enemy'),
+  elProgressBar: document.getElementById('progressbar-enemy')
+}
+
+$btn.addEventListener('click', function () {
+  console.log('Kick');
+  console.log(random(20))
+  changeHP(random(20), character);
+  changeHP(random(20), enemy);
+});
+
+function init() {
+  console.log('Start Game!');
+  renderHP(character);
+  renderHP(enemy);
+}
+
+function changeHP(count, person) {
+  if (person.damageHP < count) {
+    person.damageHP = 0;
+    alert('Бедный ' + person.name + ' проиграл бой!');
+    $btn.disabled = true;
+  } else {
+    person.damageHP -=count;  
+  }
+  renderHP(person);
+}
+
+init();
+
+function renderHP(person) {
+  renderHPLife(person);
+  renderProgressBarHP(person);
+}
+
+function renderHPLife(person) {
+  person.elHP.innerText = person.damageHP + ' / ' + person.defaultHP;
+}
+
+function renderProgressBarHP(person) {
+  person.elProgressBar.style.width = person.damageHP + '%';
+}
+
+function random(num) {
+  return Math.ceil(Math.random() * num);
+}
