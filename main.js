@@ -42,6 +42,7 @@ function changeHP(count) {
     this.damageHP = 0;
     alert('Бедный ' + this.name + ' проиграл бой!');
     $btn.disabled = true;
+  
   } else {
     this.damageHP -=count;  
   }
