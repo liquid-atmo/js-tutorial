@@ -38,6 +38,20 @@ $btn.addEventListener('click', function () {
   enemy.changeHP(random(20));
 });
 
+const countClicks = () => {
+  let counter = 0;
+  let maxClicks = 6;
+  return () => {
+    if (counter === maxClicks - 1) {
+      $btn.disabled = true;
+    }
+    console.log(` Ты кликнул ${++counter} раз`);
+    putCountdown(maxClicks, counter, '#countdown');
+  }
+}
+
+$btn.addEventListener('click', countClicks() );
+
 function init() {
   console.log('Start Game!');
   character.renderHP();
@@ -50,7 +64,7 @@ function changeHP(count) {
 
   const log = this === enemy ? generateLog(this, character) : generateLog(this, enemy);
   console.log(log);
-  putLogIntoDiv(log);
+  putLogIntoDiv(log, '#logs');
   
   if (this.damageHP < count) {
     this.damageHP = 0;
@@ -95,14 +109,27 @@ function generateLog(firstPerson, secondPerson) {
   return logs[random(logs.length - 1)]
 }
 
-function putLogIntoDiv(content) {
-	// пример деструктуризации
-	const { $p: $pCopy, $logs} = {$p: document.createElement('p'), $logs: document.querySelector('#logs')};
-	//const $p = document.createElement('p');
-	$pCopy.innerText = `${++counter} - ${content}`;
-	//const $logs = document.querySelector('#logs');
-	$logs.insertBefore($pCopy, logs.children[0]);
+function putLogIntoDiv(content, selector) {
+	const $p = document.createElement('p');
+	$p.innerText = `${++counter} - ${content}`;
+	const $logs = document.querySelector(selector);
+	$logs.insertBefore($p, logs.children[0]);
 }
+
+function putCountdown (maxClicks, currentCounter, selector) {
+	const $p = document.createElement('p');
+	$p.innerText = `${maxClicks - currentCounter}`;
+	const $countdown = document.querySelector(selector);
+	$countdown.insertBefore($p, $countdown.children[0]);
+	!!$countdown.children[1] && $countdown.children[1].remove();
+}
+
+// function countClicks() {
+//   let counter = 0;d
+//   return function () {
+//   	console.log(` Ты кликнул ${++counter} раз`);
+//   }
+// }
 
 init();
 
