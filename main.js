@@ -2,8 +2,14 @@ function $getElById(id) {
   return document.getElementById(id);
 
 }
-const $btn = $getElById('btn-kick');
-let counter = 0;
+const $btn1 = $getElById('btn-kick');
+const $btn2 = $getElById('btn-punch');
+
+const counter = (() => {
+	let cnt = 0;
+	return () => {return ++cnt;}
+})();
+
 
 const character = {
   name: 'Picachu',
@@ -31,26 +37,35 @@ const enemy = {
   renderProgressBarHP
 }
 
-$btn.addEventListener('click', function () {
+$btn1.addEventListener('click', function () {
   console.log('Kick');
-  console.log(random(20))
-  character.changeHP(random(20));
-  enemy.changeHP(random(20));
+  console.log(random(30))
+  character.changeHP(random(30));
+  enemy.changeHP(random(30));
 });
 
-const countClicks = () => {
+$btn2.addEventListener('click', function () {
+  console.log('Punch!');
+  console.log(random(50))
+  character.changeHP(random(50));
+  enemy.changeHP(random(50));
+});
+
+const countClicks = (selector) => {
   let counter = 0;
   let maxClicks = 6;
   return () => {
     if (counter === maxClicks - 1) {
+      $btn = document.querySelector(selector);;
       $btn.disabled = true;
     }
     console.log(` Ты кликнул ${++counter} раз`);
-    putCountdown(maxClicks, counter, '#countdown');
+    putCountdown(maxClicks, counter, selector + ' span#countdown');
   }
 }
 
-$btn.addEventListener('click', countClicks() );
+$btn1.addEventListener('click', countClicks('#btn-kick') );
+$btn2.addEventListener('click', countClicks('#btn-punch') );
 
 function init() {
   console.log('Start Game!');
@@ -69,7 +84,9 @@ function changeHP(count) {
   if (this.damageHP < count) {
     this.damageHP = 0;
     alert('Бедный ' + this.name + ' проиграл бой!');
-    $btn.disabled = true;
+    $btn1.disabled = true;
+    $btn2.disabled = true;
+
   
   }
 
@@ -109,9 +126,10 @@ function generateLog(firstPerson, secondPerson) {
   return logs[random(logs.length - 1)]
 }
 
+
 function putLogIntoDiv(content, selector) {
 	const $p = document.createElement('p');
-	$p.innerText = `${++counter} - ${content}`;
+	$p.innerText = `${counter()}. - ${content}`;
 	const $logs = document.querySelector(selector);
 	$logs.insertBefore($p, logs.children[0]);
 }
@@ -124,12 +142,6 @@ function putCountdown (maxClicks, currentCounter, selector) {
 	!!$countdown.children[1] && $countdown.children[1].remove();
 }
 
-// function countClicks() {
-//   let counter = 0;d
-//   return function () {
-//   	console.log(` Ты кликнул ${++counter} раз`);
-//   }
-// }
 
 init();
 
