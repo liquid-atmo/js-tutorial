@@ -40,6 +40,7 @@ body {
     position: relative;
     margin: 20px;
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
 }
@@ -273,6 +274,7 @@ body {
     min-height: 30px;
     vertical-align: middle;
     padding: 12px 20px;
+    margin: 10px;
     outline: none !important;
     cursor: pointer;
     font-size: 18px;
