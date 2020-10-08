@@ -1,83 +1,98 @@
+import Pockemon from "./Pockemon.js"
+import {random, counter} from "./utils.js";
+
+const player1 = new Pockemon({
+  name: 'Picachu',
+  type: 'electric',
+  hp: 200,
+  selectors: 'character'
+});
+
+const player2 = new Pockemon({
+  name: 'Charmander',
+  type: 'water',
+  hp: 200,
+  selectors: 'enemy'
+});
+
+console.log(player1);
+console.log(player2);
+
+let logCounter = counter();
+
 function $getElById(id) {
   return document.getElementById(id);
 
 }
-const $btn = $getElById('btn-kick');
-let counter = 0;
+const $btn1 = $getElById('btn-kick');
+const $btn2 = $getElById('btn-punch');
 
-const character = {
-  name: 'Picachu',
-  defaultHP: 200,
-  damageHP: 200,
-  currentDamage: null,
-  elHP: $getElById('health-character'),
-  elProgressBar: $getElById('progressbar-character'),
-  renderHP,
-  changeHP,
-  renderHPLife,
-  renderProgressBarHP
-}
 
-const enemy = {
-  name: 'Charmander',
-  defaultHP: 200,
-  damageHP: 200,
-  currentDamage: null,
-  elHP: $getElById('health-enemy'),
-  elProgressBar: $getElById('progressbar-enemy'),
-  renderHP,
-  changeHP,
-  renderHPLife,
-  renderProgressBarHP
-}
-
-$btn.addEventListener('click', function () {
+$btn1.addEventListener('click', function () {
   console.log('Kick');
-  console.log(random(20))
-  character.changeHP(random(20));
-  enemy.changeHP(random(20));
+  console.log(random(30));
+  player1.changeHP(random(30), function (count) {
+  	console.log(generateLog(player1, player2));
+  });
+  player2.changeHP(random(30), function (count) {
+  	console.log(generateLog(player1, player2));
+  });
 });
+
+$btn2.addEventListener('click', function () {
+  console.log('Punch!');
+  console.log(random(50))
+  player1.changeHP(random(50), function (count) {
+  	console.log(generateLog(player1, player2));
+  });
+  player2.changeHP(random(50), function (count) {
+  	console.log(generateLog(player1, player2));
+  });
+});
+
+const countClicks = (selector) => {
+  let counter = 0;
+  let maxClicks = 6;
+  return () => {
+    if (counter === maxClicks - 1) {
+      let $btn = document.querySelector(selector);;
+      $btn.disabled = true;
+    }
+    console.log(` Ты кликнул ${++counter} раз`);
+    putCountdown(maxClicks, counter, selector + ' span#countdown');
+  }
+}
+
+$btn1.addEventListener('click', countClicks('#btn-kick') );
+$btn2.addEventListener('click', countClicks('#btn-punch') );
 
 function init() {
   console.log('Start Game!');
-  character.renderHP();
-  enemy.renderHP();
+  player1.renderHP();
+  player2.renderHP();
 }
 
-function changeHP(count) {
-  this.damageHP -=count;
-  this.currentDamage = count;
+// function changeHP(count) {
+//   this.damageHP -=count;
+//   this.currentDamage = count;
 
-  const log = this === enemy ? generateLog(this, character) : generateLog(this, enemy);
-  console.log(log);
-  putLogIntoDiv(log);
+//   const log = this === enemy ? generateLog(this, character) : generateLog(this, enemy);
+//   console.log(log);
+//   putLogIntoDiv(log, '#logs');
   
-  if (this.damageHP < count) {
-    this.damageHP = 0;
-    alert('Бедный ' + this.name + ' проиграл бой!');
-    $btn.disabled = true;
+//   if (this.damageHP < count) {
+//     this.damageHP = 0;
+//     alert('Бедный ' + this.name + ' проиграл бой!');
+//     $btn1.disabled = true;
+//     $btn2.disabled = true;
+
   
-  }
+//   }
 
-  this.renderHP();
-}
+//   this.renderHP();
+// }
 
-function renderHP() {
-  this.renderHPLife();
-  this.renderProgressBarHP();
-}
 
-function renderHPLife() {
-  this.elHP.innerText = this.damageHP + ' / ' + this.defaultHP;
-}
-
-function renderProgressBarHP() {
-  this.elProgressBar.style.width = (this.damageHP / this.defaultHP) * 100 + '%';
-}
-
-function random(num) { 
-  return Math.round(Math.random() * num);
-}
 
 function generateLog(firstPerson, secondPerson) {
   const logs = [
@@ -95,14 +110,22 @@ function generateLog(firstPerson, secondPerson) {
   return logs[random(logs.length - 1)]
 }
 
-function putLogIntoDiv(content) {
-	// пример деструктуризации
-	const { $p: $pCopy, $logs} = {$p: document.createElement('p'), $logs: document.querySelector('#logs')};
-	//const $p = document.createElement('p');
-	$pCopy.innerText = `${++counter} - ${content}`;
-	//const $logs = document.querySelector('#logs');
-	$logs.insertBefore($pCopy, logs.children[0]);
+
+function putLogIntoDiv(content, selector) {
+	const $p = document.createElement('p');
+	$p.innerText = `${logCounter()}. - ${content}`;
+	const $logs = document.querySelector(selector);
+	$logs.insertBefore($p, logs.children[0]);
 }
+
+function putCountdown (maxClicks, currentCounter, selector) {
+	const $p = document.createElement('p');
+	$p.innerText = `${maxClicks - currentCounter}`;
+	const $countdown = document.querySelector(selector);
+	$countdown.insertBefore($p, $countdown.children[0]);
+	!!$countdown.children[1] && $countdown.children[1].remove();
+}
+
 
 init();
 
