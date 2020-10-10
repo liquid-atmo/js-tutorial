@@ -10,8 +10,7 @@ export function randomInteger(min, max) {
 }
 
 
-export const counter = () => {
-	let cnt = 0;
+export const counter = (cnt = 0) => {
 	return () => {return ++cnt;}
 };
 
@@ -65,4 +64,26 @@ export function removeAllButtons() {
   $allBtn.forEach((item) => {
     item.remove();
   });
+}
+
+export function setLevel (count) {
+  let $levelEl = document.querySelectorAll('.lvl');
+  console.log($levelEl);
+  $levelEl.forEach((item) => {
+    item.innerText = `Lv. ${count}`;
+      });
+
+}
+
+export function setColorHPProgressbar (player) {
+  player.elProgressBar.classList.toggle('low', false);
+  player.elProgressBar.classList.toggle('critical', false);
+  if (player.damageHP < 100 && player.damageHP > 40) {
+    player.elProgressBar.classList.add('low');
+  }
+
+  if (player.damageHP <= 40) {
+    player.elProgressBar.classList.add('critical');
+  }
+
 }

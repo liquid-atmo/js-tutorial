@@ -1,4 +1,3 @@
-import {endOfGame} from './main.js';
 
 class Selectors {
 	constructor(name) {
@@ -11,7 +10,7 @@ class Selectors {
 
 
 class Pockemon extends Selectors {
-	constructor ({ name, hp, type, img, selectors, attacks}) {
+	constructor ({ name, hp, type, img, selectors, attacks, id}) {
         super(selectors);
         this.name = name;
         this.defaultHP = hp;
@@ -20,6 +19,7 @@ class Pockemon extends Selectors {
         this.type = type;
 				this.img = img;
 				this.attacks = attacks;
+				this.id = id;
         this.renderHP();
 				this.renderImg();
 				this.renderName();
@@ -51,17 +51,11 @@ class Pockemon extends Selectors {
       this.damageHP -=count;
       this.currentDamage = count;
 
-      if (this.damageHP < count) {
-        this.damageHP = 0;
-				// вызвать функцию конца игры ()
-				// ('Бедный ' + this.name + ' проиграл бой!')"
-				// пригласить играть заново
-        alert('Бедный ' + this.name + ' проиграл бой!');
-				endOfGame();
-
-
-
+			if (this.damageHP < count) {
+	      this.damageHP = 0;
+				alert('Бедный ' + this.name + ' проиграл бой!');
       }
+
       this.renderHP();
       !!cb && cb(count);
 
