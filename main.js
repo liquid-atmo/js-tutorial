@@ -1,108 +1,100 @@
-function $getElById(id) {
-  return document.getElementById(id);
+import Pockemon from "./Pockemon.js"
+import {random, counter, countBtn, $getElById, generateLog, randomInteger,
+  getRandomPokemon, removeAllButtons, setLevel, setColorHPProgressbar} from "./utils.js";
 
-}
-const $btn = $getElById('btn-kick');
-let counter = 0;
+class Game {
 
-const character = {
-  name: 'Picachu',
-  defaultHP: 200,
-  damageHP: 200,
-  currentDamage: null,
-  elHP: $getElById('health-character'),
-  elProgressBar: $getElById('progressbar-character'),
-  renderHP,
-  changeHP,
-  renderHPLife,
-  renderProgressBarHP
-}
-
-const enemy = {
-  name: 'Charmander',
-  defaultHP: 200,
-  damageHP: 200,
-  currentDamage: null,
-  elHP: $getElById('health-enemy'),
-  elProgressBar: $getElById('progressbar-enemy'),
-  renderHP,
-  changeHP,
-  renderHPLife,
-  renderProgressBarHP
-}
-
-$btn.addEventListener('click', function () {
-  console.log('Kick');
-  console.log(random(20))
-  character.changeHP(random(20));
-  enemy.changeHP(random(20));
-});
-
-function init() {
-  console.log('Start Game!');
-  character.renderHP();
-  enemy.renderHP();
-}
-
-function changeHP(count) {
-  this.damageHP -=count;
-  this.currentDamage = count;
-
-  const log = this === enemy ? generateLog(this, character) : generateLog(this, enemy);
-  console.log(log);
-  putLogIntoDiv(log);
-  
-  if (this.damageHP < count) {
-    this.damageHP = 0;
-    alert('Бедный ' + this.name + ' проиграл бой!');
-    $btn.disabled = true;
-  
+  getPokemons = async () => {
+    const response = await fetch('https://reactmarathon-api.netlify.app/api/pokemons');
+    const body = await response.json();
+    return body;
   }
 
-  this.renderHP();
+  start = async () => {
+    const pokemons = await this.getPokemons();
+    removeAllButtons();
+    setLevel(1);
+
+    // random choice of pokemons
+    let p1 = getRandomPokemon(pokemons);
+    console.log(p1);
+    // excludes first found pokemon from array to avoid same enemies
+    let pokemonToExcludeIndex = pokemons.indexOf(p1);
+    pokemons.splice(pokemonToExcludeIndex, 1);
+    let p2 = getRandomPokemon(pokemons);
+
+    let player1 = new Pockemon({
+      ...p1,
+      selectors: 'player1'
+    });
+    setColorHPProgressbar(player1);
+    let player2 = new Pockemon({
+      ...p2,
+      selectors: 'player2'
+    });
+    setColorHPProgressbar(player2);
+
+    const $control = document.querySelector('.control');
+    player1.attacks.forEach((item) => {
+      // console.log(item);
+      const $btn = document.createElement('button');
+      $btn.classList.add('button');
+      $btn.innerText = item.name;
+      const btnCount = countBtn(item.maxCount, $btn);
+      const levelCount = counter(1);
+      $btn.addEventListener('click', () => {
+        btnCount();
+        let q = this.fight(player1.id, item.id, player2.id);
+        q.then(data => {
+          player1.changeHP(data.kick.player1);
+          setColorHPProgressbar(player1);
+          player2.changeHP(data.kick.player2);
+          setColorHPProgressbar(player2);
+        }).then(() => {
+          // choosing next opponent
+          if (player2.damageHP ===0
+          && !(player1.damageHP ===0)) {
+            p2 = getRandomPokemon(pokemons);
+            player2 = new Pockemon({
+            ...p2,
+            selectors: 'player2'
+            });
+            setColorHPProgressbar(player2);
+            // increase level counter
+            setLevel(levelCount());
+          }
+          if (player1.damageHP ===0) {
+            this.endOfGame();
+          }
+        });
+      });
+      $control.appendChild($btn);
+    });
+
+    console.log('Start Game!');
+    player1.renderHP();
+    player2.renderHP();
+  }
+
+  endOfGame = () => {
+    removeAllButtons();
+    const $btn = document.createElement('button');
+    $btn.classList.add('button');
+    $btn.innerText = 'Game Over. Restart?';
+    $btn.addEventListener('click', () => {
+      this.start();
+    });
+    const $control = document.querySelector('.control');
+    $control.appendChild($btn);
+  }
+
+  fight = async (player1Id, player1AttackId, player2Id) => {
+    const response = await fetch(`https://reactmarathon-api.netlify.app/api/fight?player1id=${player1Id}&attackId=${player1AttackId}&player2id=${player2Id}`);
+    const body = await response.json();
+    console.log(body)
+    return body;
+  }
 }
 
-function renderHP() {
-  this.renderHPLife();
-  this.renderProgressBarHP();
-}
-
-function renderHPLife() {
-  this.elHP.innerText = this.damageHP + ' / ' + this.defaultHP;
-}
-
-function renderProgressBarHP() {
-  this.elProgressBar.style.width = (this.damageHP / this.defaultHP) * 100 + '%';
-}
-
-function random(num) { 
-  return Math.round(Math.random() * num);
-}
-
-function generateLog(firstPerson, secondPerson) {
-  const logs = [
-    `${firstPerson.name} вспомнил что-то важное, но неожиданно ${secondPerson.name}, не помня себя от испуга, ударил в предплечье врага. -${firstPerson.currentDamage} [${firstPerson.damageHP} / ${firstPerson.defaultHP}]`,
-    `${firstPerson.name} поперхнулся, и за это ${secondPerson.name} с испугу приложил прямой удар коленом в лоб врага. -${firstPerson.currentDamage} [${firstPerson.damageHP} / ${firstPerson.defaultHP}]`,
-    `${firstPerson.name} забылся, но в это время наглый ${secondPerson.name}, приняв волевое решение, неслышно подойдя сзади, ударил.-${firstPerson.currentDamage} [${firstPerson.damageHP} / ${firstPerson.defaultHP}]`,
-    `${firstPerson.name} пришел в себя, но неожиданно ${secondPerson.name} случайно нанес мощнейший удар. -${firstPerson.currentDamage} [${firstPerson.damageHP} / ${firstPerson.defaultHP}]`,
-    `${firstPerson.name} поперхнулся, но в это время ${secondPerson.name} нехотя раздробил кулаком \<вырезанно цензурой\> противника. -${firstPerson.currentDamage} [${firstPerson.damageHP} / ${firstPerson.defaultHP}]`,
-    `${firstPerson.name} удивился, а ${secondPerson.name} пошатнувшись влепил подлый удар. -${firstPerson.currentDamage} [${firstPerson.damageHP} / ${firstPerson.defaultHP}]`,
-    `${firstPerson.name} высморкался, но неожиданно ${secondPerson.name} провел дробящий удар. -${firstPerson.currentDamage} [${firstPerson.damageHP} / ${firstPerson.defaultHP}]`,
-    `${firstPerson.name} пошатнулся, и внезапно наглый ${secondPerson.name} беспричинно ударил в ногу противника -${firstPerson.currentDamage} [${firstPerson.damageHP} / ${firstPerson.defaultHP}]`,
-    `${firstPerson.name} расстроился, как вдруг, неожиданно ${secondPerson.name} случайно влепил стопой в живот соперника. -${firstPerson.currentDamage} [${firstPerson.damageHP} / ${firstPerson.defaultHP}]`,
-    `${firstPerson.name} пытался что-то сказать, но вдруг, неожиданно ${secondPerson.name} со скуки, разбил бровь сопернику. -${firstPerson.currentDamage} [${firstPerson.damageHP} / ${firstPerson.defaultHP}]`
-  ];
-  return logs[random(logs.length - 1)]
-}
-
-function putLogIntoDiv(content) {
-	// пример деструктуризации
-	const { $p: $pCopy, $logs} = {$p: document.createElement('p'), $logs: document.querySelector('#logs')};
-	//const $p = document.createElement('p');
-	$pCopy.innerText = `${++counter} - ${content}`;
-	//const $logs = document.querySelector('#logs');
-	$logs.insertBefore($pCopy, logs.children[0]);
-}
-
-init();
-
+const game = new Game();
+game.start();
